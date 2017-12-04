@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Hello world</title>
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io('/patient_milestone_update');
+  socket.on('1', onNotification);
+
+  function onNotification(message) {
+    console.log(message);
+  }
+
+  function onConnectionSuccess(message) {
+    console.log(message);
+  }
+</script>
+
+<body>Hello world</body>
+
+</html>
