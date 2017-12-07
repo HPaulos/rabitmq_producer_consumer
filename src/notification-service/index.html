@@ -2,12 +2,19 @@
 <html>
 
 <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+    crossorigin="anonymous">
   <title>Hello world</title>
 </head>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  var socket = io('/patient_milestone_update');
-  socket.on('1', onNotification);
+  var serverSocket = io.connect();
+
+  serverSocket.on("p1", onNotification);
+
+  var serverSocket1 = io('/patient_milestone_update');
+
+  serverSocket1.on('p1', onNotification);
 
   function onNotification(message) {
     console.log(message);
@@ -18,6 +25,13 @@
   }
 </script>
 
-<body>Hello world</body>
+<body>
+  <div class="container">
+    Namespace:
+    <input name="namespace" type="text"></input>
+    <br/>
+    <button>Add Namespace</button>
+  </div>
+</body>
 
 </html>

@@ -1,0 +1,1 @@
+node .\src\notification-reader\test-reader.js

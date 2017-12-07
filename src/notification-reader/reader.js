@@ -1,15 +1,15 @@
 (function () {
     'use strict';
-
     const amqp = require('amqplib/callback_api');
     const logger = require('../logger.js')();
 
     var that;
 
-    function Reader(url, queueName, messageHandler) {
+    function Reader(url, exchangeName, exchangeType, messageHandler) {
         that = this;
         that.url = url;
-        that.queueName = queueName;
+        that.exchangeName = exchangeName;
+        that.exchangeType = exchangeType;
         that.messageHandler = messageHandler;
     }
 
@@ -23,13 +23,15 @@
         connection.createChannel((err, channel) => {
             if (err) { logger.error(err); return; }
 
-            channel.assertQueue(that.queueName, { durable: false });
-            channel.consume(that.queueName, that.messageHandler, { noAck: true });
+            channel.assertExchange(that.exchangeName, that.exchangeType, { durable: false });
+            //queue will have automatically generated random name
+            channel.assertQueue('', { exclusive: true }, (err, q) => {
+                logger.info(" [*] Waiting for messages in %s. To exit press CTRL+C", q.queue);
+                channel.bindQueue(q.queue, that.exchangeName, '');
+                channel.consume(q.queue, that.messageHandler, { noAck: true });
+            });
         });
     }
 
     module.exports = Reader;
 })();
-
-
-
