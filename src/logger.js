@@ -1,29 +1,29 @@
-(function () {
-    'use strict';
-    const winston = require('winston');
-    winston.addColors({
-        silly: 'magenta',
-        debug: 'blue',
-        verbose: 'cyan',
-        info: 'green',
-        warn: 'yellow',
-        error: 'red'
-    });
+'use strict';
 
-    function Logger() {
-    }
+const winston = require('winston');
 
-    Logger.prototype.info = (...info) => {
-        winston.info(...info);
-    };
+winston.addColors({
+    silly: 'magenta',
+    debug: 'blue',
+    verbose: 'cyan',
+    info: 'green',
+    warn: 'yellow',
+    error: 'red'
+});
 
-    Logger.prototype.error = (...error) => {
-        winston.error(...error);
-    };
+function Logger() {
+}
 
-    Logger.prototype.silly = (...message) => { 
-        winston.silly(...message);
-    };
+Logger.prototype.info = (...info) => {
+    winston.info(...info);
+};
 
-    module.exports = (arg) => { return new Logger(); };
-})();
+Logger.prototype.error = (...error) => {
+    winston.error(...error);
+};
+
+Logger.prototype.silly = (...message) => {
+    winston.silly(...message);
+};
+
+module.exports = (arg) => { return new Logger(); };
