@@ -1,0 +1,1 @@
+node .\src\mocks\mock-publisher.js

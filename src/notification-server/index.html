@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+    crossorigin="anonymous">
+  <title>Hello world</title>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var serverSocket = io.connect();
+
+  var category = 'hello';
+  var id = 'p1';
+
+  var serverSocket = io('/' + category);
+  serverSocket.emit('subscribe', id);
+
+  serverSocket.on('unspecified', function (args) {
+    console.log('message comes');
+  });
+
+</script>
+
+<body>
+  <div class="container">
+    <label>
+      Category :
+      <input id="category" name="category" type="text"></input>
+    </label>
+    <br/>
+
+    <label>
+      Id :
+      <input id="id" name="id" type="text"></input>
+    </label>
+    <br/>
+
+    <label>
+      Content :
+      <textarea id="content" name="content"></textarea>
+    </label>
+    <br/>
+
+    <button id="publish">Publish</button>
+  </div>
+
+  <script>
+    $("#publish").click(function () {
+      var category = $('#category').val();
+      var id = $('#id').val();
+      var content = $('#content').val();
+      alert("Here are: " + category + id + content);
+
+      $.ajax({
+        url: 'http://localhost:3000/message',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          content: content,
+          id: id,
+          type: category
+        }),
+        dataType: 'json'
+      });
+    });
+  </script>
+</body>
+
+</html>

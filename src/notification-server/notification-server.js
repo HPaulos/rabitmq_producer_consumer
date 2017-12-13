@@ -24,27 +24,48 @@ NotificationServer.prototype.start = () => {
 };
 
 NotificationServer.prototype.createNamespace = (namespace) => {
-    logger.info('creating namespace...');
+    logger.info('creating namespace %s...', namespace);
     var nsp = that.io.of('/' + namespace);
+    that.namespaces[namespace] = nsp;
+
     nsp.on('connection', (socket) => {
-        that.namespaces[namespace] = socket;
+        logger.silly('connecting client to namespace...');
+
+        socket.on('subscribe', (room) => {
+            logger.silly('subscribing to room %s...', room);
+            socket.join(room);
+        });
+
+        socket.on('unsubscribe', (room) => {
+            logger.silly('unsubscribing from room %s...', room);
+            socket.leave(room);
+        });
+    });
+
+    nsp.on('disconnect', () => {
+        logger.silly('disconnecting client...', room);
     });
 };
 
-NotificationServer.prototype.notify = (namespace, eventName, message) => {
+NotificationServer.prototype.notify = (namespace, room, eventName, message) => {
     logger.info('sending to %s type message to %s namespace ', eventName, namespace | "");
+
     if (!namespace) {
         return that.io.emit(eventName, message);
     }
 
     var socket = that.namespaces[namespace];
-    
+
     if (!socket) {
         return logger.error(namespace + ' namespace is not found.');
     }
 
-    logger.info(namespace);
-    socket.emit(eventName, message);
+    if (room) {
+        socket.in(room).emit(eventName, message);
+    } else {
+        socket.emit(eventName, message);
+    }
+
 };
 
 module.exports = NotificationServer;
