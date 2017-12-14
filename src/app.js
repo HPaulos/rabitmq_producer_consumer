@@ -8,21 +8,30 @@ const logger = require('./logger.js')();
 const portNumber = config.notificationServerPortNumber;
 const notificationServer = new NotificationServer(portNumber);
 notificationServer.start();
-
 config.exchanges.forEach((exchange) => {
     logger.info("setting up %s namespace", exchange.name);
     notificationServer.createNamespace(exchange.name);
 });
 
-const url = config.rmqURL;
+notificationServer.on('subscription', (namespace, room) => {
+    console.log("Subsscription Event Fired for %s in %s room", namespace, room);
+});
 
+notificationServer.on('unsubscription', (namespace, room) => {
+    console.log("UnSubsscription Event Fired for %s in %s room", namespace, room);
+});
+
+notificationServer.on('disconnection', () => {
+    console.log("Disconnection Event Fired");
+});
+
+const url = config.rmqURL;
 const notificationReader = new NotificationReader(url, config.exchanges, [messageHandler]);
 notificationReader.start();
 
 function messageHandler(message) {
     var namespace = message.fields.exchange;
     var room = message.fields.routingKey;
-    var eventName = message.properties.headers.type || 'unspecified';
-    var message = JSON.parse(message.content);
-    notificationServer.notify(namespace, room, eventName, message);
+    var messageToBeSent = { headers: message.properties.headers, body: JSON.parse(message.content) };
+    notificationServer.sendMessage(namespace, room, messageToBeSent);
 }

@@ -5,7 +5,7 @@ function connectAndSubscribe(url, context, onMessageReceived) {
     namespaces[context.name] = namespace;
     namespace.emit('subscribe', context.id);
 
-    namespace.on('unspecified', onMessageReceived);
+    namespace.on('message', onMessageReceived);
 
     return namespace;
 }

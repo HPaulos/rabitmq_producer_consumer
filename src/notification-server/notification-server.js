@@ -1,15 +1,19 @@
-
 'use strict';
 
 const express = require('express');
 const socketIo = require('socket.io');
 const http = require('http');
+const util = require('util');
+const EventEmitter = require('events').EventEmitter;
 const routes = require('./routes.js');
 const logger = require('../logger.js')();
 
 var that;
 
+util.inherits(NotificationServer, EventEmitter);
+
 function NotificationServer(portNumber) {
+    EventEmitter.call(this);
     that = this;
     that.portNumber = portNumber;
     that.namespaces = {};
@@ -35,18 +39,25 @@ NotificationServer.prototype.createNamespace = (namespace) => {
             if (room) {
                 logger.info('subscribing to room %s...', room);
                 socket.join(room);
-            }            
+                that.emit('subscription', namespace, room);
+            }
         });
 
         socket.on('unsubscribe', (room) => {
             logger.info('unsubscribing from room %s...', room);
             socket.leave(room);
+            that.emit('unsubscription', namespace, room);
         });
     });
 
     nsp.on('disconnect', () => {
-        logger.info('disconnecting client...', room);
+        logger.info('disconnecting client...');
+        that.emit('disconnection', namespace);
     });
+};
+
+NotificationServer.prototype.sendMessage = (namespace, room, message) => {
+    that.notify(namespace, room, "message", message);
 };
 
 NotificationServer.prototype.notify = (namespace, room, eventName, message) => {
