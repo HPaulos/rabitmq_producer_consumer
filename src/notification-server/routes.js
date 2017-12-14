@@ -1,14 +1,16 @@
 'use strict';
 
 const express = require("express");
-const logger = require('../logger.js')();
-const router = express.Router();
 const bodyParser = require('body-parser');
+const router = express.Router();
+const path = require('path');
+const logger = require('../logger.js')();
 const Publisher = require('../publisher/publisher');
 
-router.use(bodyParser.json())
-var publisher = new Publisher();
+router.use(bodyParser.json());
+router.use(express.static(path.join(__dirname, '/public')));
 
+var publisher = new Publisher();
 
 router.get("/", (req, res) => {
     logger.info('serving index.html...');

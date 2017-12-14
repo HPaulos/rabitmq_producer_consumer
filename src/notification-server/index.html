@@ -8,22 +8,14 @@
 </head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script>
-  var serverSocket = io.connect();
-
-  var category = 'hello';
-  var id = 'p1';
-
-  var serverSocket = io('/' + category);
-  serverSocket.emit('subscribe', id);
-
-  serverSocket.on('unspecified', function (args) {
-    console.log('message comes');
-  });
-
-</script>
+<script src="client.js"></script>
 
 <body>
+
+  <script>
+    var url = 'http://localhost:3000';
+  </script>
+  <p id="res"></p>
   <div class="container">
     <label>
       Category :
@@ -44,14 +36,17 @@
     <br/>
 
     <button id="publish">Publish</button>
+    <button id="consume">Consume</button>
+    <button id="disconnect">Disconnect</button>
   </div>
 
   <script>
+    var count = 1;
+
     $("#publish").click(function () {
       var category = $('#category').val();
       var id = $('#id').val();
       var content = $('#content').val();
-      alert("Here are: " + category + id + content);
 
       $.ajax({
         url: 'http://localhost:3000/message',
@@ -65,6 +60,40 @@
         dataType: 'json'
       });
     });
+
+    $("#consume").click(function () {
+      console.log('Adding Consumer: ');
+      var category = $('#category').val();
+      var id = $('#id').val();
+
+      var context = {
+        name: category,
+        id: id
+      };
+
+      connectAndSubscribe(url, context, onMessageReceived(count, context));
+      count++;
+      function onMessageReceived(count, context) {
+        return function (args) {
+          console.log('%s: consuming message of type % and id %s', count, context.name, context.id);
+          console.log(args);
+        };
+      }
+    });
+
+    $("#disconnect").click(function () {
+      var category = $('#category').val();
+      var id = $('#id').val();
+
+      var context = {
+        name: category,
+        id: id
+      };
+
+      unsubscribe(context);
+    });
+
+
   </script>
 </body>
 

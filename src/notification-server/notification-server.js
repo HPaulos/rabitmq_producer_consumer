@@ -29,21 +29,23 @@ NotificationServer.prototype.createNamespace = (namespace) => {
     that.namespaces[namespace] = nsp;
 
     nsp.on('connection', (socket) => {
-        logger.silly('connecting client to namespace...');
+        logger.info('connecting client to namespace...');
 
         socket.on('subscribe', (room) => {
-            logger.silly('subscribing to room %s...', room);
-            socket.join(room);
+            if (room) {
+                logger.info('subscribing to room %s...', room);
+                socket.join(room);
+            }            
         });
 
         socket.on('unsubscribe', (room) => {
-            logger.silly('unsubscribing from room %s...', room);
+            logger.info('unsubscribing from room %s...', room);
             socket.leave(room);
         });
     });
 
     nsp.on('disconnect', () => {
-        logger.silly('disconnecting client...', room);
+        logger.info('disconnecting client...', room);
     });
 };
 
