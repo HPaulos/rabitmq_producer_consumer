@@ -7,6 +7,7 @@ const util = require('util');
 const EventEmitter = require('events').EventEmitter;
 const routes = require('./routes.js');
 const logger = require('../logger.js')();
+const contextMapper = require('../mapper/context-mapper');
 
 var that;
 
@@ -35,15 +36,17 @@ NotificationServer.prototype.createNamespace = (namespace) => {
     nsp.on('connection', (socket) => {
         logger.info('connecting client to namespace...');
 
-        socket.on('subscribe', (room) => {
-            if (room) {
+        socket.on('subscribe', (context) => {
+            if (context) {                
+                let room = contextMapper(context);
                 logger.info('subscribing to room %s...', room);
                 socket.join(room);
                 that.emit('subscription', namespace, room);
             }
         });
 
-        socket.on('unsubscribe', (room) => {
+        socket.on('unsubscribe', (context) => {
+            let room = contextMapper(context);
             logger.info('unsubscribing from room %s...', room);
             socket.leave(room);
             that.emit('unsubscription', namespace, room);

@@ -24,8 +24,20 @@
     <br/>
 
     <label>
-      Context Id :
+      Id :
       <input id="id" name="id" type="text"></input>
+    </label>
+    <br/>
+
+    <label>
+      User Id :
+      <input id="userId" name="userId" type="text"></input>
+    </label>
+    <br/>
+
+    <label>
+      Task Id :
+      <input id="taskId" name="taskId" type="text"></input>
     </label>
     <br/>
 
@@ -46,17 +58,24 @@
     $("#publish").click(function () {
       var category = $('#category').val();
       var id = $('#id').val();
+      var userId = $('#userId').val();
+      var taskId = $('#taskId').val();
+
       var content = $('#content').val();
+
+      var body = {
+        name: category,
+        id: id,
+        userId: userId,
+        taskId: taskId,
+        content: content
+      };
 
       $.ajax({
         url: 'http://localhost:3000/message',
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({
-          content: content,
-          id: id,
-          type: category
-        }),
+        data: JSON.stringify(body),
         dataType: 'json'
       });
     });
@@ -65,17 +84,21 @@
       console.log('Adding Consumer: ');
       var category = $('#category').val();
       var id = $('#id').val();
+      var userId = $('#userId').val();
+      var taskId = $('#taskId').val();
 
       var context = {
         name: category,
-        id: id
+        id: id,
+        userId: userId,
+        taskId: taskId
       };
 
       connectAndSubscribe(url, context, onMessageReceived(count, context));
       count++;
       function onMessageReceived(count, context) {
         return function (args) {
-          console.log('%s: consuming message of type % and id %s', count, context.name, context.id);
+          console.log('%s: consuming message of type %s and id %s', count, context.name, context.id);
           console.log(args);
         };
       }

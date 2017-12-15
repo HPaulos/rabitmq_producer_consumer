@@ -7,6 +7,7 @@ const logger = require('./logger.js')();
 
 const portNumber = config.notificationServerPortNumber;
 const notificationServer = new NotificationServer(portNumber);
+
 notificationServer.start();
 config.exchanges.forEach((exchange) => {
     logger.info("setting up %s namespace", exchange.name);

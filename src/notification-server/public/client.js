@@ -3,7 +3,7 @@ var namespaces = {};
 function connectAndSubscribe(url, context, onMessageReceived) {
     var namespace = io.connect(url + "/" + context.name);
     namespaces[context.name] = namespace;
-    namespace.emit('subscribe', context.id);
+    namespace.emit('subscribe', context);
 
     namespace.on('message', onMessageReceived);
 

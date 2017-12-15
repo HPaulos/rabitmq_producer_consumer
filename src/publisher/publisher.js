@@ -6,18 +6,27 @@ var that;
 
 function Publisher() {
     that = this;
+    that.channel = new Promise((resolve, reject) => {
+        amqp.connect(config.rmqURL, (err, connection) => {
+            if (err) { return reject(err).catch(that.logError); }
 
-    amqp.connect(config.rmqURL, (err, connection) => {
-        connection.createChannel((err, channel) => {
-            that.channel = channel;
+            connection.createChannel((err, channel) => {
+                if (err) { return reject(err).catch(that.logError); }
+                resolve(channel);
+            });
         });
     });
 }
 
-Publisher.prototype.publish = (message) => {
-    console.log("before publishing: ", message);
-    that.channel.assertExchange(message.exchange.name, message.exchange.type, { durable: message.exchange.durable ? true : false });
-    that.channel.publish(message.exchange.name, message.exchange.room, new Buffer(message.content));
+Publisher.prototype.publish = async (message) => {
+    let channel = await that.channel;
+    channel.assertExchange(message.exchange.name, message.exchange.type, { durable: message.exchange.durable ? true : false });
+    console.log("Publishing: ", message);
+    channel.publish(message.exchange.name, message.exchange.room, new Buffer(message.content));
+};
+
+Publisher.prototype.logError = (error) => { 
+    console.log(error);
 };
 
 module.exports = Publisher;

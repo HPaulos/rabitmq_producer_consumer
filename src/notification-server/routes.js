@@ -6,6 +6,7 @@ const router = express.Router();
 const path = require('path');
 const logger = require('../logger.js')();
 const Publisher = require('../publisher/publisher');
+const contextMapper = require('../mapper/context-mapper');
 
 router.use(bodyParser.json());
 router.use(express.static(path.join(__dirname, '/public')));
@@ -21,8 +22,8 @@ router.post('/message', (req, res) => {
     var message = {
         content: req.body.content || "{}",
         exchange: {
-            room: req.body.id,
-            name: req.body.type,
+            room: contextMapper(req.body),
+            name: req.body.name,
             type: 'fanout',
             durable: false
         }

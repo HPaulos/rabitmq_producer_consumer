@@ -1,14 +1,14 @@
 module.exports = {
     exchanges: [
         {
-            name: 'task_list',
+            name: 'TaskList',
             type: 'fanout',
             options: {
                 durable: false
             }
         },
         {
-            name: 'task',
+            name: 'Task',
             type: 'fanout',
             options: {
                 durable: false
