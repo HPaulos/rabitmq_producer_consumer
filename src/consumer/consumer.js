@@ -1,47 +1,61 @@
 'use strict';
 
 const amqp = require('amqplib/callback_api');
+const EventEmitter = require('events').EventEmitter;
+
 const logger = require('../logger.js')();
-const eventEmitter = require('events').EventEmitter;
+const util = require('util');
 
 var that;
 
-function Consumer(url, exchanges, handlers) {
+util.inherits(Consumer, EventEmitter);
+
+function Consumer(url, exchanges) {
     that = this;
     that.url = url;
     that.exchanges = exchanges || [];
-    that.handlers = handlers || [];
 }
 
 Consumer.prototype.start = () => {
-    amqp.connect(that.url, (err, connection) => {
-        if (err) { return logger.error(err); }
-
-        connection.createChannel((err, channel) => {
-            if (err) { return logger.error(err); }
-
-            connectToExchanges(channel, that.exchanges, that.handlers);
+    that.connection = new Promise((resolve, reject) => {
+        amqp.connect(that.url, (err, connection) => {
+            if (err) { reject(err).catch((err) => logger.error(err)); }
+            resolve(connection);
         });
     });
 };
 
-function connectToExchanges(channel, exchanges, handlers) {
-    exchanges.forEach(exchange => {
+Consumer.prototype.subscribe = async (exchangeContext, handlers) => {
+    let aConnection = await that.connection;
+
+    let exchange = that.getExchangeConfig(exchangeContext.name);
+    let routingKey = exchangeContext.key;
+    
+    aConnection.createChannel((err, channel) => {
         channel.assertExchange(exchange.name, exchange.type, exchange.options);
 
         //queue will have automatically generated random name
         channel.assertQueue(null, { exclusive: true }, (err, q) => {
-            logger.info(" [*] Waiting for messages in %s. To exit press CTRL+C", q.queue);
-
-            channel.bindQueue(q.queue, exchange.name, '');
-
+            channel.bindQueue(q.queue, exchange.name, routingKey);
+            
             handlers.forEach((handler) => {
                 channel.consume(q.queue, handler, { noAck: true });
             });
         });
-
     });
+};
 
-}
+Consumer.prototype.getExchangeConfig = (name) => {
+    let found;
+    
+    for (let exchange of that.exchanges) {
+        if (exchange.name === name) {
+            found = exchange;
+            break;
+        }
+    };
+    
+    return found;
+};
 
 module.exports = Consumer;

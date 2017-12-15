@@ -7,14 +7,13 @@ const util = require('util');
 const EventEmitter = require('events').EventEmitter;
 const routes = require('./routes.js');
 const logger = require('../logger.js')();
-const contextMapper = require('../mapper/context-mapper');
+const getRoomName = require('../mapper/room-mapper');
 
 var that;
 
 util.inherits(NotificationServer, EventEmitter);
 
 function NotificationServer(portNumber) {
-    EventEmitter.call(this);
     that = this;
     that.portNumber = portNumber;
     that.namespaces = {};
@@ -37,16 +36,15 @@ NotificationServer.prototype.createNamespace = (namespace) => {
         logger.info('connecting client to namespace...');
 
         socket.on('subscribe', (context) => {
-            if (context) {                
-                let room = contextMapper(context);
-                logger.info('subscribing to room %s...', room);
+            if (context) {
+                let room = getRoomName(context);
                 socket.join(room);
-                that.emit('subscription', namespace, room);
+                that.emit('subscription', { name: context.name, room: room });
             }
         });
 
         socket.on('unsubscribe', (context) => {
-            let room = contextMapper(context);
+            let room = getRoomName(context);
             logger.info('unsubscribing from room %s...', room);
             socket.leave(room);
             that.emit('unsubscription', namespace, room);

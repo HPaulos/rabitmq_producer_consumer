@@ -6,7 +6,9 @@ const router = express.Router();
 const path = require('path');
 const logger = require('../logger.js')();
 const Publisher = require('../publisher/publisher');
-const contextMapper = require('../mapper/context-mapper');
+const getRoomName = require('../mapper/room-mapper');
+const getExchangeContextFromNameSpaceContext = require('../mapper/namespace-exchange-mapper');
+
 
 router.use(bodyParser.json());
 router.use(express.static(path.join(__dirname, '/public')));
@@ -19,13 +21,15 @@ router.get("/", (req, res) => {
 });
 
 router.post('/message', (req, res) => {
+    let namespaceContext = { name: req.body.name, room: getRoomName(req.body) };
+    let exchange = getExchangeContextFromNameSpaceContext(namespaceContext);
     var message = {
         content: req.body.content || "{}",
         exchange: {
-            room: contextMapper(req.body),
-            name: req.body.name,
+            name: exchange.name,
+            key: exchange.key,
             type: 'fanout',
-            durable: false
+            durable: true
         }
     };
 
