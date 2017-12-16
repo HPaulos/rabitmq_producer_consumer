@@ -1,4 +1,5 @@
 'use strict';
+
 const contextMapper = require('../../config/config');
 
 function getTaskContextRoom(context) {
@@ -6,7 +7,7 @@ function getTaskContextRoom(context) {
 }
 
 function getTaskListContextRoom(context) {
-    return '';
+    return `${context.userId}`;
 }
 
 function getRoomName(context) {

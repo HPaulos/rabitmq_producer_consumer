@@ -36,7 +36,7 @@ Consumer.prototype.subscribe = async (exchangeContext, handlers) => {
 
         //queue will have automatically generated random name
         channel.assertQueue(null, { exclusive: true }, (err, q) => {
-            channel.bindQueue(q.queue, exchange.name, routingKey);
+            channel.bindQueue(q.queue, exchange.name);
             
             handlers.forEach((handler) => {
                 channel.consume(q.queue, handler, { noAck: true });

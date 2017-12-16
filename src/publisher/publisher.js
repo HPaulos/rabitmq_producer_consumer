@@ -21,6 +21,7 @@ function Publisher() {
 Publisher.prototype.publish = async (message) => {
     let channel = await that.channel;
     channel.assertExchange(message.exchange.name, message.exchange.type, { durable: true ,autoDelete: true});
+    console.log(message);
     channel.publish(message.exchange.name, message.exchange.key, new Buffer(message.content));
 };
 

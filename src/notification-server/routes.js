@@ -21,6 +21,7 @@ router.get("/", (req, res) => {
 });
 
 router.post('/message', (req, res) => {
+    console.log(req.body);
     let namespaceContext = { name: req.body.name, room: getRoomName(req.body) };
     let exchange = getExchangeContextFromNameSpaceContext(namespaceContext);
     var message = {

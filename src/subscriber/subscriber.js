@@ -14,4 +14,3 @@ Subscriber.prototype.subscribeForMessage = function (context, handlers) {
 };
 
 module.exports = Subscriber;
-//TODO map context to exchange name and routinekey
